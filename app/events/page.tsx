@@ -1,5 +1,11 @@
 "use client"
 
+interface User {
+  firstName: string;
+  lastName: string;
+  type: string;
+}
+
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -111,7 +117,7 @@ const EVENTS = [
 
 export default function EventsPage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
   const [showPremiumDialog, setShowPremiumDialog] = useState(false)
@@ -176,16 +182,24 @@ export default function EventsPage() {
     router.push("/")
   }
 
-  const formatDate = (dateString) => {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
-    return new Date(dateString).toLocaleDateString("en-US", options)
+  const formatDate = (dateString?: string) => {
+    if (!dateString || isNaN(new Date(dateString).getTime())) return "Invalid date";
+    
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: "long", 
+      year: "numeric", 
+      month: "long", 
+      day: "numeric" 
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   }
 
-  const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(":")
-    const hour = Number.parseInt(hours)
-    return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`
-  }
+  const formatTime = (timeString?: string): string => {
+    if (!timeString || !/^\d{2}:\d{2}$/.test(timeString)) return "Invalid time";
+    const [hours, minutes] = timeString.split(":");
+    const hour = Number.parseInt(hours, 10);
+    return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`;
+  };
 
   if (isLoading) {
     return (
@@ -221,19 +235,18 @@ export default function EventsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">
-                      {user.firstName} {user.lastName}
-                      {isPremium && (
-                        <Badge variant="outline" className="ml-2 bg-[#0a1f56]/10 text-[#0a1f56] border-[#0a1f56]/20">
-                          Premium
-                        </Badge>
-                      )}
-                    </p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                </div>
+              <div className="flex items-center justify-start gap-2 p-2">
+  <div className="flex flex-col space-y-1 leading-none">
+    <p className="font-medium">
+      {user?.firstName} {user?.lastName}
+      {isPremium && (
+        <Badge variant="outline" className="ml-2 bg-[#0a1f56]/10 text-[#0a1f56] border-[#0a1f56]/20">
+          Premium
+        </Badge>
+      )}
+    </p>
+  </div>
+</div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/bookings">My Bookings</Link>
