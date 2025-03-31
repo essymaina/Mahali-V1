@@ -1,24 +1,27 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import QRCode from "qrcode";
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
-    const { email, bookingDetails } = await request.json()
+    const { email, bookingId } = await request.json();
 
-    // In a real application, you would:
-    // 1. Save the booking to a database
-    // 2. Generate a QR code
-    // 3. Send an email with the QR code to the user
+    if (!email || !bookingId) {
+      return NextResponse.json({ success: false, message: "Email and Booking ID are required" }, { status: 400 });
+    }
 
-    // This is a mock implementation
-    console.log(`Sending confirmation email to ${email} with booking details:`, bookingDetails)
+    // Generate QR Code with booking details
+    const qrCodeDataURL = await QRCode.toDataURL(`https://mahali.com/checkin/${bookingId}`);
+
+    // Mock: Log the QR code for now (later, attach it to an email)
+    console.log(`Generated QR Code for booking ${bookingId}:`, qrCodeDataURL);
 
     return NextResponse.json({
       success: true,
-      message: "Confirmation email sent successfully",
-    })
+      message: "QR Code generated successfully",
+      qrCode: qrCodeDataURL,
+    });
   } catch (error) {
-    console.error("Error sending confirmation email:", error)
-    return NextResponse.json({ success: false, message: "Failed to send confirmation email" }, { status: 500 })
+    console.error("Error generating QR Code:", error);
+    return NextResponse.json({ success: false, message: "Failed to generate QR Code" }, { status: 500 });
   }
 }
-
