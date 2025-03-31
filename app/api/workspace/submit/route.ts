@@ -1,24 +1,43 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
-export async function POST(request) {
+export async function GET(request: Request) {
   try {
-    const workspaceData = await request.json()
+    const { searchParams } = new URL(request.url);
+    const location = searchParams.get("location");
+    const category = searchParams.get("category");
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const pageSize = 10;
 
-    // In a real application, you would:
-    // 1. Save the workspace listing to a database
-    // 2. Send a confirmation email to the workspace owner
-    // 3. Notify admins about the new listing for review
+    let query = supabase.from("workspaces").select("*");
 
-    // This is a mock implementation
-    console.log("New workspace listing submitted:", workspaceData)
+    // Apply filters
+    if (location) {
+      query = query.ilike("location", `%${location}%`);
+    }
 
-    return NextResponse.json({
-      success: true,
-      message: "Workspace listing submitted successfully",
-    })
+    if (category) {
+      query = query.ilike("category", `%${category}%`);
+    }
+
+    // Sorting: First by 'editor's pick' (assumes a boolean column `editors_pick`), then most recent
+    query = query.order("editors_pick", { ascending: false }).order("created_at", { ascending: false });
+
+    // Pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+
+    // Fetch data
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return NextResponse.json({ success: true, workspaces: data });
   } catch (error) {
-    console.error("Error submitting workspace listing:", error)
-    return NextResponse.json({ success: false, message: "Failed to submit workspace listing" }, { status: 500 })
+    console.error("Error fetching workspaces:", error);
+    return NextResponse.json({ success: false, message: "Failed to fetch workspaces" }, { status: 500 });
   }
 }
-

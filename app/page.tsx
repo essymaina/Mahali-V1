@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn } from "src/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 // Define the expected shape of the user object

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Calendar,
   ChevronLeft,
@@ -169,9 +169,11 @@ const ATTENDEES = [
   { id: "u8", name: "Frank Gray", avatar: "/placeholder.svg?height=100&width=100", commonSpaces: 1, commonEvents: 0 },
 ]
 
-export default function EventDetailPage({ params }) {
-  const router = useRouter()
-  const [user, setUser] = useState(null)
+export default function EventDetailPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const [event, setEvent] = useState(null);
+}
+
   const [isLoading, setIsLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
   const [event, setEvent] = useState(null)
@@ -181,6 +183,27 @@ export default function EventDetailPage({ params }) {
   const [showAttendeeProfile, setShowAttendeeProfile] = useState(false)
 
   useEffect(() => {
+    async function fetchEvent() {
+      if (!params?.id) return; // Ensure params.id exists before fetching
+
+      try {
+        const res = await fetch(`/api/events/${params.id}`);
+        if (!res.ok) throw new Error("Failed to fetch event");
+        Property
+        const data = await res.json();
+        setEvent(data);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+      }
+    }
+      
+    fetchEvent();
+  }, [params.id]);
+
+  if (!event) return <div>loading...</div>;
+
+  return <div>Event ID: {event.id}</div>;
+}
     // Check if user is logged in
     const authData = localStorage.getItem("mahali-user-auth")
 
