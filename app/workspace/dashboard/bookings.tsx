@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { JSX, useState } from "react"
 import Image from "next/image"
 import { Calendar, Clock, MapPin, User } from "lucide-react"
 
@@ -17,8 +17,30 @@ import {
   DialogFooter,
 } from "../../../components/ui/dialog"
 
+// Define types
+interface BookingUser {
+  name: string
+  email: string
+  phone: string
+}
+
+interface Booking {
+  id: string
+  workspaceId: string
+  workspaceName: string
+  workspaceImage: string
+  location: string
+  date: string
+  time: string
+  table: string
+  people: number
+  price: number
+  status: string
+  user: BookingUser
+}
+
 // Mock data for bookings
-const BOOKINGS = [
+const BOOKINGS: Booking[] = [
   {
     id: "b1",
     workspaceId: "ws1",
@@ -112,21 +134,21 @@ const BOOKINGS = [
 ]
 
 export default function WorkspaceBookings() {
-  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [showBookingDetails, setShowBookingDetails] = useState(false)
 
-  const formatDate = (dateString) => {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  const formatTime = (timeString) => {
+  const formatTime = (timeString: string): string => {
     const [hours, minutes] = timeString.split(":")
     const hour = Number.parseInt(hours)
     return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string): JSX.Element => {
     switch (status) {
       case "completed":
         return (
@@ -151,7 +173,7 @@ export default function WorkspaceBookings() {
     }
   }
 
-  const handleViewBooking = (booking) => {
+  const handleViewBooking = (booking: Booking): void => {
     setSelectedBooking(booking)
     setShowBookingDetails(true)
   }
@@ -418,4 +440,3 @@ export default function WorkspaceBookings() {
     </div>
   )
 }
-

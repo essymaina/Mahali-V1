@@ -18,8 +18,42 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu"
 
+// Define types
+interface UserType {
+  firstName: string
+  lastName: string
+  email: string
+  type: string
+}
+
+interface Workspace {
+  id: string
+  name: string
+  location: string
+  image: string
+  lastVisited: string
+}
+
+interface Event {
+  id: string
+  title: string
+  location: string
+  image: string
+  date: string
+}
+
+interface ProfileType {
+  id: string
+  name: string
+  avatar: string
+  bio: string
+  isPremium: boolean
+  workspaces: Workspace[]
+  events: Event[]
+}
+
 // Mock data for user profile
-const USERS = [
+const USERS: ProfileType[] = [
   {
     id: "u1",
     name: "Jane Doe",
@@ -93,10 +127,16 @@ const USERS = [
   },
 ]
 
-export default function ProfilePage({ params }) {
+interface ProfilePageProps {
+  params: {
+    id: string
+  }
+}
+
+export default function ProfilePage({ params }: ProfilePageProps) {
   const router = useRouter()
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
+  const [user, setUser] = useState<UserType | null>(null)
+  const [profile, setProfile] = useState<ProfileType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
 
@@ -109,7 +149,7 @@ export default function ProfilePage({ params }) {
       return
     }
 
-    const userData = JSON.parse(authData)
+    const userData = JSON.parse(authData) as UserType
 
     if (userData.type !== "user") {
       router.push("/auth/user/login")
@@ -146,19 +186,14 @@ export default function ProfilePage({ params }) {
     router.push("/")
   }
 
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" }
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  if (isLoading) {
+  if (isLoading || !user || !profile) {
     return (
-      <div className="min-h-screen flex items-center  options)
-  }
-
-  if (isLoading) {
-    return (
-      <div className=\"min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
       </div>
     )
@@ -371,4 +406,3 @@ export default function ProfilePage({ params }) {
     </div>
   )
 }
-

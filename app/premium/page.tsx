@@ -20,9 +20,17 @@ import {
 } from "../../components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../components/ui/dialog"
 
+// Define user type
+interface UserType {
+  firstName: string
+  lastName: string
+  email: string
+  type: string
+}
+
 export default function PremiumPage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<UserType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [billingCycle, setBillingCycle] = useState("monthly")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -37,7 +45,7 @@ export default function PremiumPage() {
       return
     }
 
-    const userData = JSON.parse(authData)
+    const userData = JSON.parse(authData) as UserType
 
     if (userData.type !== "user") {
       router.push("/auth/user/login")
@@ -86,7 +94,7 @@ export default function PremiumPage() {
     router.push("/events")
   }
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -345,4 +353,3 @@ export default function PremiumPage() {
     </div>
   )
 }
-

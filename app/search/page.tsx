@@ -7,11 +7,38 @@ import { ChevronLeft, MapPin, Search, Star, User } from "lucide-react"
 
 import { Button } from "../../components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../../components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+// Define workspace type
+interface Workspace {
+  id: string
+  name: string
+  category: string
+  location: string
+  price: number
+  rating: number
+  image: string
+  description: string
+  availability: string
+}
+
+// Define category and location map types
+interface CategoryMap {
+  [key: string]: string
+}
+
+interface LocationMap {
+  [key: string]: string
+}
+
 // Mock data for workspaces
-const WORKSPACES = [
+const WORKSPACES: Workspace[] = [
   {
     id: "1",
     name: "Nairobi Garage",
@@ -88,10 +115,10 @@ export default function SearchPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [category, setCategory] = useState(searchParams.get("category") || "")
-  const [location, setLocation] = useState(searchParams.get("location") || "")
-  const [date, setDate] = useState(searchParams.get("date") || "")
-  const [filteredWorkspaces, setFilteredWorkspaces] = useState([])
+  const [category, setCategory] = useState<string>(searchParams.get("category") || "")
+  const [location, setLocation] = useState<string>(searchParams.get("location") || "")
+  const [date, setDate] = useState<string>(searchParams.get("date") || "")
+  const [filteredWorkspaces, setFilteredWorkspaces] = useState<Workspace[]>([])
 
   useEffect(() => {
     // Filter workspaces based on search params
@@ -117,8 +144,8 @@ export default function SearchPage() {
     router.push(`/search?${params.toString()}`)
   }
 
-  const getCategoryLabel = (value) => {
-    const categories = {
+  const getCategoryLabel = (value: string): string => {
+    const categories: CategoryMap = {
       "art-gallery": "Art Gallery",
       "coffee-shop": "Coffee Shop",
       "coworking-space": "Coworking Space",
@@ -128,8 +155,8 @@ export default function SearchPage() {
     return categories[value] || value
   }
 
-  const getLocationLabel = (value) => {
-    const locations = {
+  const getLocationLabel = (value: string): string => {
+    const locations: LocationMap = {
       westlands: "Westlands",
       kilimani: "Kilimani",
       karen: "Karen",
@@ -315,4 +342,3 @@ export default function SearchPage() {
     </div>
   )
 }
-

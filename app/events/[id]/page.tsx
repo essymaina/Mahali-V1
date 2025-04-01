@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 import {
   Calendar,
   ChevronLeft,
@@ -39,8 +39,42 @@ import {
   DialogFooter,
 } from "../../../components/ui/dialog"
 
+// Define types
+interface UserType {
+  firstName: string
+  lastName: string
+  email: string
+  type: string
+}
+
+interface Attendee {
+  id: string
+  name: string
+  avatar: string
+  commonSpaces: number
+  commonEvents: number
+}
+
+interface Event {
+  id: string
+  title: string
+  description: string
+  image: string
+  date: string
+  time: string
+  endTime: string
+  location: string
+  address: string
+  category: string
+  attendees: number
+  price: number
+  featured: boolean
+  organizer: string
+  organizerLogo: string
+}
+
 // Mock data for events
-const EVENTS = [
+const EVENTS: Event[] = [
   {
     id: "e1",
     title: "Tech Networking Mixer",
@@ -152,7 +186,7 @@ const EVENTS = [
 ]
 
 // Mock data for attendees
-const ATTENDEES = [
+const ATTENDEES: Attendee[] = [
   { id: "u1", name: "Jane Doe", avatar: "/placeholder.svg?height=100&width=100", commonSpaces: 2, commonEvents: 1 },
   { id: "u2", name: "John Smith", avatar: "/placeholder.svg?height=100&width=100", commonSpaces: 1, commonEvents: 3 },
   {
@@ -170,40 +204,17 @@ const ATTENDEES = [
 ]
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [event, setEvent] = useState(null);
-}
-
+  const router = useRouter()
+  const [user, setUser] = useState<UserType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
-  const [event, setEvent] = useState(null)
+  const [event, setEvent] = useState<Event | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
-  const [selectedAttendee, setSelectedAttendee] = useState(null)
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null)
   const [showAttendeeProfile, setShowAttendeeProfile] = useState(false)
 
   useEffect(() => {
-    async function fetchEvent() {
-      if (!params?.id) return; // Ensure params.id exists before fetching
-
-      try {
-        const res = await fetch(`/api/events/${params.id}`);
-        if (!res.ok) throw new Error("Failed to fetch event");
-        Property
-        const data = await res.json();
-        setEvent(data);
-      } catch (error) {
-        console.error("Error fetching event:", error);
-      }
-    }
-      
-    fetchEvent();
-  }, [params.id]);
-
-  if (!event) return <div>loading...</div>;
-
-  return <div>Event ID: {event.id}</div>;
-}
     // Check if user is logged in
     const authData = localStorage.getItem("mahali-user-auth")
 
@@ -212,7 +223,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
       return
     }
 
-    const userData = JSON.parse(authData)
+    const userData = JSON.parse(authData) as UserType
 
     if (userData.type !== "user") {
       router.push("/auth/user/login")
@@ -249,12 +260,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     router.push("/")
   }
 
-  const formatDate = (dateString) => {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  const formatTime = (timeString) => {
+  const formatTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(":")
     const hour = Number.parseInt(hours)
     return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`
@@ -277,12 +288,12 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     }, 1500)
   }
 
-  const handleViewAttendee = (attendee) => {
+  const handleViewAttendee = (attendee: Attendee) => {
     setSelectedAttendee(attendee)
     setShowAttendeeProfile(true)
   }
 
-  if (isLoading) {
+  if (isLoading || !event || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -705,4 +716,3 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     </div>
   )
 }
-

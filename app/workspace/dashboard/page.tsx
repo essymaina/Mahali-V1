@@ -18,9 +18,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Badge } from "../../../components/ui/badge"
 import WorkspaceBookings from "./bookings"
 
+// Define user type
+interface WorkspaceUser {
+  type: string
+  businessName?: string
+  email: string
+}
+
 export default function WorkspaceDashboardPage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<WorkspaceUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -32,7 +39,7 @@ export default function WorkspaceDashboardPage() {
       return
     }
 
-    const userData = JSON.parse(authData)
+    const userData = JSON.parse(authData) as WorkspaceUser
 
     if (userData.type !== "workspace") {
       router.push("/auth/workspace/login")
@@ -48,7 +55,7 @@ export default function WorkspaceDashboardPage() {
     router.push("/")
   }
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -206,4 +213,3 @@ export default function WorkspaceDashboardPage() {
     </div>
   )
 }
-
