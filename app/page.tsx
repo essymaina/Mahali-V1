@@ -5,17 +5,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Search, User, LogOut } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+} from "../components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../components/ui/select";
 import { cn } from "src/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "../components/theme-toggle";
 
 // Define the expected shape of the user object
 interface User {

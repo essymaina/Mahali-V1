@@ -5,11 +5,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import { Separator } from "../../../../components/ui/separator"
+import { Checkbox } from "../../../../components/ui/checkbox"
 
 export default function UserSignupPage() {
   const router = useRouter()
@@ -21,10 +21,10 @@ export default function UserSignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")

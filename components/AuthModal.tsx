@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
 
 export default function AuthModal({ open, onClose }) {
   const supabase = createClientComponentClient();
