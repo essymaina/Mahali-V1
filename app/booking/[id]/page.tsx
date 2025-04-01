@@ -3,8 +3,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { ChevronLeft, MapPin, Star, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "../../../components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu"
+import { Params } from "next/dist/server/request/params"
 
 // Mock data for workspaces
 const WORKSPACES = [
@@ -135,7 +136,7 @@ const WORKSPACES = [
   },
 ]
 
-export default function BookingDetailPage({ params }) {
+export default function BookingDetailPage({ params }: { params: Params }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const date = searchParams.get("date") || ""

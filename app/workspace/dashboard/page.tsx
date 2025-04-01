@@ -5,17 +5,17 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Building, Clock, LogOut, Plus, Settings, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "../../../components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+} from "../../../components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Badge } from "../../../components/ui/badge"
 import WorkspaceBookings from "./bookings"
 
 export default function WorkspaceDashboardPage() {

@@ -4,10 +4,10 @@ import { useState } from "react"
 import Image from "next/image"
 import { X, Upload, Plus, Camera } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "../../../components/ui/button"
+import { Label } from "../../../components/ui/label"
+import { Input } from "../../../components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
 
 export default function PhotosUpload({ photos, setPhotos }) {
   const [dragActive, setDragActive] = useState(false)

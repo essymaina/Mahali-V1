@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { ChevronLeft, MapPin, Search, Star, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "../../components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "../../components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 // Mock data for workspaces

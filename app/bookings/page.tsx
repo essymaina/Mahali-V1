@@ -1,22 +1,30 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { type JSX, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Building, Calendar, ChevronRight, Clock, CreditCard, LogOut, MapPin, Settings, Star, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent } from "../../components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Badge } from "../../components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "../../components/ui/dropdown-menu"
+
+// Define user type
+interface User {
+  firstName: string
+  lastName: string
+  email: string
+  type: string
+}
 
 // Mock data for bookings
 const PAST_BOOKINGS = [
@@ -95,7 +103,7 @@ const INCOMPLETE_BOOKINGS = [
 
 export default function BookingsPage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isPremium, setIsPremium] = useState(false)
 
@@ -129,25 +137,32 @@ export default function BookingsPage() {
     router.push("/")
   }
 
-  const formatDate = (dateString) => {
-    const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  const formatTime = (timeString) => {
+  const formatTime = (timeString: string): string => {
     const [hours, minutes] = timeString.split(":")
     const hour = Number.parseInt(hours)
-    return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`
+    const formattedHour = hour % 12 || 12 // Convert 0 to 12 for midnight
+    const period = hour >= 12 ? "PM" : "AM"
+    return `${formattedHour}:${minutes} ${period}`
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string): JSX.Element => {
     switch (status) {
       case "completed":
-        return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            Completed
-          </Badge>
-        )
+        return <span className="badge badge-success">Completed</span>
+      case "pending":
+        return <span className="badge badge-warning">Pending</span>
+      case "canceled":
+        return <span className="badge badge-error">Canceled</span>
+      default:
+        return <span className="badge badge-info">Unknown</span>
+        ;<Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          Completed
+        </Badge>
       case "confirmed":
         return (
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -160,8 +175,6 @@ export default function BookingsPage() {
             Payment Pending
           </Badge>
         )
-      default:
-        return <Badge variant="outline">{status}</Badge>
     }
   }
 
@@ -202,14 +215,16 @@ export default function BookingsPage() {
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
                     <p className="font-medium">
-                      {user.firstName} {user.lastName}
+                      {user ? `${user.firstName} ${user.lastName}` : "Guest"}
                       {isPremium && (
                         <Badge variant="outline" className="ml-2 bg-[#0a1f56]/10 text-[#0a1f56] border-[#0a1f56]/20">
                           Premium
                         </Badge>
                       )}
                     </p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      {user ? user.email : "No email available"}
+                    </p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />

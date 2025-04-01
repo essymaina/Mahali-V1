@@ -6,13 +6,14 @@ import Image from "next/image"
 import { ChevronLeft, CreditCard, Phone, User } from "lucide-react"
 import confetti from "canvas-confetti"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "../../../../components/ui/button"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../../../components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Params } from "next/dist/server/request/params"
 
 // Mock data for workspaces
 const WORKSPACES = [
@@ -94,8 +95,8 @@ const WORKSPACES = [
   },
 ]
 
-export default function PaymentPage({ params }) {
-  const router = useRouter()
+export default function PaymentPage({ params }: { params: Params }) {
+  const router = useRouter();
   const searchParams = useSearchParams()
   const date = searchParams.get("date") || ""
 
@@ -126,14 +127,14 @@ export default function PaymentPage({ params }) {
     )
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true)
 
     // Simulate payment processing
     setTimeout(() => {
-      setIsSubmitting(false)
-      setShowConfirmation(true)
+      setIsSubmitting(false);
+      setShowConfirmation(true);
 
       // Trigger confetti animation
       confetti({

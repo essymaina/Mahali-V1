@@ -1,7 +1,7 @@
 "use client"; // Required for state-based components in Next.js App Router
 
-import { useAuthStore } from "@/app/store/authStore";
-import { supabase } from "@/src/lib/supabaseClient";
+import { useAuthStore } from "../app/store/authStore";
+import { supabase } from "../src/lib/supabaseClient";
 
 export default function Navbar() {
   const { user, signOut } = useAuthStore();

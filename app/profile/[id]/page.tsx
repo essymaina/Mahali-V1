@@ -6,17 +6,17 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Building, Calendar, ChevronLeft, LogOut, MapPin, Settings, Star, User } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "../../../components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
+import { Badge } from "../../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "../../../components/ui/dropdown-menu"
 
 // Mock data for user profile
 const USERS = [
