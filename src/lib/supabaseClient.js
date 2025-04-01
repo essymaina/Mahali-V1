@@ -1,10 +1,34 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient as supabaseCreateClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Get the environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+// Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Supabase environment variables are missing!");
+  console.error("Missing Supabase environment variables")
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Define the createClient function
+export const createClient = (cookieStore) => {
+  const options = cookieStore
+    ? {
+        cookies: {
+          get(name) {
+            return cookieStore.get(name)?.value
+          },
+          set(name, value, options) {
+            cookieStore.set({ name, value, ...options })
+          },
+          remove(name, options) {
+            cookieStore.delete({ name, ...options })
+          },
+        },
+      }
+    : {}
+
+  return supabaseCreateClient(supabaseUrl, supabaseAnonKey, options)
+}
+
+// Create a default client for client-side usage
+export const supabase = createClient()
