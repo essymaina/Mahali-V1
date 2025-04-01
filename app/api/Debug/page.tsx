@@ -1,4 +1,4 @@
-import DebugHelper from "./debug-helper"
+import DebugHelper from "../workspace/debug-helper"
 
 export default function DebugPage() {
   return (
