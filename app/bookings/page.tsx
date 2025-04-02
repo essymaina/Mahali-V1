@@ -1,14 +1,12 @@
 "use client"
 
-import { type JSX, useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import Image from "next/image"
-import { Building, Calendar, ChevronRight, Clock, CreditCard, LogOut, MapPin, Settings, Star, User } from "lucide-react"
+import { Calendar, Clock, LogOut, MapPin, Settings, User, X } from "lucide-react"
 
 import { Button } from "../../components/ui/button"
-import { Card, CardContent } from "../../components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Badge } from "../../components/ui/badge"
 import {
   DropdownMenu,
@@ -17,173 +15,111 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { useAuth } from "../../components/auth-context"
 
-// Define user type
-interface User {
-  firstName: string
-  lastName: string
-  email: string
-  type: string
+// Define booking type
+interface Booking {
+  id: string
+  workspaceName: string
+  location: string
+  date: string
+  startTime: string
+  endTime: string
+  status: "upcoming" | "completed" | "cancelled"
+  image: string
 }
 
-// Mock data for bookings
-const PAST_BOOKINGS = [
+// Mock bookings data
+const BOOKINGS: Booking[] = [
   {
     id: "b1",
-    workspaceId: "1",
     workspaceName: "Nairobi Garage",
-    workspaceImage: "/placeholder.svg?height=300&width=400",
     location: "Westlands",
-    date: "2025-03-10",
-    time: "09:00",
-    table: "Hot Desk",
-    people: 1,
-    price: 1500,
-    status: "completed",
+    date: "2025-04-15",
+    startTime: "09:00",
+    endTime: "17:00",
+    status: "upcoming",
+    image: "/placeholder.svg?height=300&width=400",
   },
   {
     id: "b2",
-    workspaceId: "3",
-    workspaceName: "The Alchemist",
-    workspaceImage: "/placeholder.svg?height=300&width=400",
-    location: "Westlands",
-    date: "2025-02-25",
-    time: "13:00",
-    table: "Garden Table",
-    people: 2,
-    price: 1200,
-    status: "completed",
+    workspaceName: "iHub Meeting Room",
+    location: "Kilimani",
+    date: "2025-04-20",
+    startTime: "14:00",
+    endTime: "16:00",
+    status: "upcoming",
+    image: "/placeholder.svg?height=300&width=400",
   },
   {
     id: "b3",
-    workspaceId: "2",
-    workspaceName: "Java House",
-    workspaceImage: "/placeholder.svg?height=300&width=400",
-    location: "Kilimani",
-    date: "2025-02-15",
-    time: "10:00",
-    table: "Window Table",
-    people: 1,
-    price: 800,
+    workspaceName: "The Alchemist",
+    location: "Westlands",
+    date: "2025-03-10",
+    startTime: "10:00",
+    endTime: "15:00",
     status: "completed",
+    image: "/placeholder.svg?height=300&width=400",
   },
-]
-
-const UPCOMING_BOOKINGS = [
   {
     id: "b4",
-    workspaceId: "5",
-    workspaceName: "Karura Forest",
-    workspaceImage: "/placeholder.svg?height=300&width=400",
+    workspaceName: "Workstyle",
     location: "Karen",
-    date: "2025-03-20",
-    time: "11:00",
-    table: "Picnic Area",
-    people: 3,
-    price: 500,
-    status: "confirmed",
+    date: "2025-03-05",
+    startTime: "09:00",
+    endTime: "18:00",
+    status: "completed",
+    image: "/placeholder.svg?height=300&width=400",
   },
-]
-
-const INCOMPLETE_BOOKINGS = [
   {
     id: "b5",
-    workspaceId: "6",
-    workspaceName: "iHub",
-    workspaceImage: "/placeholder.svg?height=300&width=400",
-    location: "Kilimani",
-    date: "2025-03-25",
-    time: "09:00",
-    table: "Hot Desk",
-    people: 1,
-    price: 1800,
-    status: "pending_payment",
+    workspaceName: "Cowork Cafe",
+    location: "Lavington",
+    date: "2025-03-01",
+    startTime: "13:00",
+    endTime: "17:00",
+    status: "cancelled",
+    image: "/placeholder.svg?height=300&width=400",
   },
 ]
 
 export default function BookingsPage() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isPremium, setIsPremium] = useState(false)
+  const { user, isLoading, isPremium, logout } = useAuth()
+  const [activeTab, setActiveTab] = useState<string>("upcoming")
 
   useEffect(() => {
     // Check if user is logged in
-    const authData = localStorage.getItem("mahali-user-auth")
-
-    if (!authData) {
-      router.push("/auth/user/login")
-      return
+    if (!isLoading && !user) {
+      router.push("/login")
     }
-
-    const userData = JSON.parse(authData)
-
-    if (userData.type !== "user") {
-      router.push("/auth/user/login")
-      return
-    }
-
-    setUser(userData)
-
-    // Check if user is premium (mock implementation)
-    const premiumStatus = localStorage.getItem("mahali-premium-status")
-    setIsPremium(premiumStatus === "active")
-
-    setIsLoading(false)
-  }, [router])
+  }, [user, isLoading, router])
 
   const handleLogout = () => {
-    localStorage.removeItem("mahali-user-auth")
+    logout()
     router.push("/")
   }
 
-  const formatDate = (dateString: string): string => {
-    const options: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  const formatTime = (timeString: string): string => {
-    const [hours, minutes] = timeString.split(":")
-    const hour = Number.parseInt(hours)
-    const formattedHour = hour % 12 || 12 // Convert 0 to 12 for midnight
-    const period = hour >= 12 ? "PM" : "AM"
-    return `${formattedHour}:${minutes} ${period}`
-  }
-
-  const getStatusBadge = (status: string): JSX.Element => {
-    switch (status) {
-      case "completed":
-        return <span className="badge badge-success">Completed</span>
-      case "pending":
-        return <span className="badge badge-warning">Pending</span>
-      case "canceled":
-        return <span className="badge badge-error">Canceled</span>
-      default:
-        return <span className="badge badge-info">Unknown</span>
-        ;<Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          Completed
-        </Badge>
-      case "confirmed":
-        return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            Confirmed
-          </Badge>
-        )
-      case "pending_payment":
-        return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-            Payment Pending
-          </Badge>
-        )
-    }
+  const getFilteredBookings = (status: string) => {
+    return BOOKINGS.filter((booking) => booking.status === status)
   }
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <div className="h-8 w-8 rounded-full border-4 border-t-primary animate-spin"></div>
       </div>
     )
+  }
+
+  if (!user) {
+    return null // Will redirect in useEffect
   }
 
   return (
@@ -198,7 +134,7 @@ export default function BookingsPage() {
             <Link href="/events" className="font-medium">
               EVENTS
             </Link>
-            <Link href="/bookings" className="font-medium">
+            <Link href="/bookings" className="font-medium text-[#0a1f56]">
               BOOKINGS
             </Link>
             <Link href="/" className="font-medium">
@@ -215,24 +151,19 @@ export default function BookingsPage() {
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
                     <p className="font-medium">
-                      {user ? `${user.firstName} ${user.lastName}` : "Guest"}
+                      {user.firstName} {user.lastName}
                       {isPremium && (
                         <Badge variant="outline" className="ml-2 bg-[#0a1f56]/10 text-[#0a1f56] border-[#0a1f56]/20">
                           Premium
                         </Badge>
                       )}
                     </p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">
-                      {user ? user.email : "No email available"}
-                    </p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/bookings">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>My Bookings</span>
-                  </Link>
+                  <Link href={`/profile/${user.id}`}>My Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
@@ -240,17 +171,6 @@ export default function BookingsPage() {
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
-                {!isPremium && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/premium" className="text-[#0a1f56] font-medium">
-                        <Star className="mr-2 h-4 w-4 fill-[#0a1f56]" />
-                        <span>Upgrade to Premium</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
@@ -287,280 +207,165 @@ export default function BookingsPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">My Bookings</h1>
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
 
-          {!isPremium && (
-            <Button
-              onClick={() => router.push("/premium")}
-              className="bg-gradient-to-r from-[#0a1f56] to-[#0a3f86] hover:from-[#0a1f56]/90 hover:to-[#0a3f86]/90 text-white"
-            >
-              <Star className="mr-2 h-4 w-4 fill-white" />
-              Upgrade to Premium
-            </Button>
-          )}
-        </div>
+          <Tabs defaultValue="upcoming" onValueChange={setActiveTab}>
+            <TabsList className="mb-6">
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
 
-        <Tabs defaultValue="upcoming">
-          <TabsList className="mb-6">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="incomplete">Incomplete</TabsTrigger>
-            <TabsTrigger value="past">Past</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="upcoming">
-            <div className="grid gap-6">
-              {UPCOMING_BOOKINGS.length > 0 ? (
-                UPCOMING_BOOKINGS.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="relative w-full md:w-48 h-48 md:h-auto">
-                          <Image
-                            src={booking.workspaceImage || "/placeholder.svg"}
-                            alt={booking.workspaceName}
-                            fill
-                            className="object-cover"
-                          />
+            <TabsContent value="upcoming">
+              {getFilteredBookings("upcoming").length > 0 ? (
+                <div className="space-y-4">
+                  {getFilteredBookings("upcoming").map((booking) => (
+                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                      <div className="relative w-full md:w-48 h-32">
+                        <Image
+                          src={booking.image || "/placeholder.svg"}
+                          alt={booking.workspaceName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="p-4 flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{booking.workspaceName}</h3>
+                          <Badge className="w-fit bg-green-500">Upcoming</Badge>
                         </div>
-                        <div className="p-6 flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="text-lg font-semibold">{booking.workspaceName}</h3>
-                              <div className="flex items-center text-sm text-gray-500 mb-2">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {booking.location}
-                              </div>
-                            </div>
-                            {getStatusBadge(booking.status)}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Date</p>
-                              <p className="font-medium flex items-center">
-                                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatDate(booking.date)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Time</p>
-                              <p className="font-medium flex items-center">
-                                <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatTime(booking.time)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Table/Space</p>
-                              <p className="font-medium">{booking.table}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">People</p>
-                              <p className="font-medium">
-                                {booking.people} {booking.people === 1 ? "Person" : "People"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-gray-500">Total Paid</p>
-                              <p className="text-lg font-bold">KSh {booking.price + Math.round(booking.price * 0.1)}</p>
-                            </div>
-                            <Button
-                              variant="outline"
-                              className="flex items-center gap-2"
-                              onClick={() => router.push(`/booking/${booking.workspaceId}`)}
-                            >
-                              View Details
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {booking.location}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          {formatDate(booking.date)}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-4">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {booking.startTime} - {booking.endTime}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            Reschedule
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-red-500 border-red-200 hover:bg-red-50">
+                            <X className="h-4 w-4 mr-1" />
+                            Cancel
+                          </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
                   <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                   <h3 className="text-xl font-medium mb-2">No upcoming bookings</h3>
-                  <p className="text-gray-500 mb-6">You don't have any upcoming workspace bookings</p>
-                  <Button onClick={() => router.push("/")}>Find a Workspace</Button>
+                  <p className="text-gray-500 mb-4">You don't have any upcoming workspace bookings</p>
+                  <Button className="bg-[#0a1f56] hover:bg-[#0a1f56]/90" asChild>
+                    <Link href="/">Find a Workspace</Link>
+                  </Button>
                 </div>
               )}
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="incomplete">
-            <div className="grid gap-6">
-              {INCOMPLETE_BOOKINGS.length > 0 ? (
-                INCOMPLETE_BOOKINGS.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="relative w-full md:w-48 h-48 md:h-auto">
-                          <Image
-                            src={booking.workspaceImage || "/placeholder.svg"}
-                            alt={booking.workspaceName}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="p-6 flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="text-lg font-semibold">{booking.workspaceName}</h3>
-                              <div className="flex items-center text-sm text-gray-500 mb-2">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {booking.location}
-                              </div>
-                            </div>
-                            {getStatusBadge(booking.status)}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Date</p>
-                              <p className="font-medium flex items-center">
-                                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatDate(booking.date)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Time</p>
-                              <p className="font-medium flex items-center">
-                                <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatTime(booking.time)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Table/Space</p>
-                              <p className="font-medium">{booking.table}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">People</p>
-                              <p className="font-medium">
-                                {booking.people} {booking.people === 1 ? "Person" : "People"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-gray-500">Total</p>
-                              <p className="text-lg font-bold">KSh {booking.price + Math.round(booking.price * 0.1)}</p>
-                            </div>
-                            <Button
-                              className="flex items-center gap-2 bg-[#0a1f56] hover:bg-[#0a1f56]/90"
-                              onClick={() => router.push(`/booking/${booking.workspaceId}/payment?date=custom`)}
-                            >
-                              <CreditCard className="h-4 w-4" />
-                              Complete Payment
-                            </Button>
-                          </div>
-                        </div>
+            <TabsContent value="completed">
+              {getFilteredBookings("completed").length > 0 ? (
+                <div className="space-y-4">
+                  {getFilteredBookings("completed").map((booking) => (
+                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                      <div className="relative w-full md:w-48 h-32">
+                        <Image
+                          src={booking.image || "/placeholder.svg"}
+                          alt={booking.workspaceName}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      <div className="p-4 flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{booking.workspaceName}</h3>
+                          <Badge className="w-fit bg-gray-500">Completed</Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {booking.location}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          {formatDate(booking.date)}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-4">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {booking.startTime} - {booking.endTime}
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Leave a Review
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <CreditCard className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-xl font-medium mb-2">No incomplete bookings</h3>
-                  <p className="text-gray-500 mb-6">You don't have any bookings waiting for payment</p>
-                  <Button onClick={() => router.push("/")}>Find a Workspace</Button>
+                  <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-xl font-medium mb-2">No completed bookings</h3>
+                  <p className="text-gray-500">You don't have any completed workspace bookings</p>
                 </div>
               )}
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="past">
-            <div className="grid gap-6">
-              {PAST_BOOKINGS.length > 0 ? (
-                PAST_BOOKINGS.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="relative w-full md:w-48 h-48 md:h-auto">
-                          <Image
-                            src={booking.workspaceImage || "/placeholder.svg"}
-                            alt={booking.workspaceName}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="p-6 flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="text-lg font-semibold">{booking.workspaceName}</h3>
-                              <div className="flex items-center text-sm text-gray-500 mb-2">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {booking.location}
-                              </div>
-                            </div>
-                            {getStatusBadge(booking.status)}
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Date</p>
-                              <p className="font-medium flex items-center">
-                                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatDate(booking.date)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Time</p>
-                              <p className="font-medium flex items-center">
-                                <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                                {formatTime(booking.time)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Table/Space</p>
-                              <p className="font-medium">{booking.table}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">People</p>
-                              <p className="font-medium">
-                                {booking.people} {booking.people === 1 ? "Person" : "People"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-gray-500">Total Paid</p>
-                              <p className="text-lg font-bold">KSh {booking.price + Math.round(booking.price * 0.1)}</p>
-                            </div>
-                            <Button
-                              variant="outline"
-                              className="flex items-center gap-2"
-                              onClick={() => router.push(`/booking/${booking.workspaceId}`)}
-                            >
-                              Book Again
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
+            <TabsContent value="cancelled">
+              {getFilteredBookings("cancelled").length > 0 ? (
+                <div className="space-y-4">
+                  {getFilteredBookings("cancelled").map((booking) => (
+                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                      <div className="relative w-full md:w-48 h-32">
+                        <Image
+                          src={booking.image || "/placeholder.svg"}
+                          alt={booking.workspaceName}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      <div className="p-4 flex-1">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{booking.workspaceName}</h3>
+                          <Badge className="w-fit bg-red-500">Cancelled</Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {booking.location}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          {formatDate(booking.date)}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 mb-4">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {booking.startTime} - {booking.endTime}
+                        </div>
+                        <Button className="bg-[#0a1f56] hover:bg-[#0a1f56]/90" size="sm">
+                          Book Again
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <Building className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-xl font-medium mb-2">No past bookings</h3>
-                  <p className="text-gray-500 mb-6">You haven't made any bookings yet</p>
-                  <Button onClick={() => router.push("/")}>Find a Workspace</Button>
+                  <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-xl font-medium mb-2">No cancelled bookings</h3>
+                  <p className="text-gray-500">You don't have any cancelled workspace bookings</p>
                 </div>
               )}
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
     </div>
   )
 }
-

@@ -74,4 +74,7 @@
     @apply bg-background text-foreground;
   }
 }
-
+/* Fix for Select dropdown visibility */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
