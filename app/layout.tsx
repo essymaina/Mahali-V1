@@ -3,7 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "../components/theme-provider"
 import Navbar from "../components/navbar"
-import {AuthProvider} from "../components/auth-context"
+import { AuthProvider } from "../components/auth-context"
 import type { Metadata } from "next"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -23,10 +23,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <Navbar />
-          <AuthProvider>{children}</AuthProvider>
-          {/* Add this div for portals */}
-          <div id="radix-portal"></div>
+          <AuthProvider>
+            <Navbar />
+            {children}
+            {/* Add this div for portals */}
+            <div id="radix-portal"></div>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

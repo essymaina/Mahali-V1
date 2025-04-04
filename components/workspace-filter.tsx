@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "../components/ui/button"
 import { Calendar } from "../components/ui/calendar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../components/ui/dropdown-menu"
@@ -45,10 +45,55 @@ const locations = [
   "Muthaiga",
 ]
 
-export function WorkspaceFilter() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All Workspaces")
-  const [selectedLocation, setSelectedLocation] = useState<string>("All Locations")
-  const [date, setDate] = useState<Date | undefined>(undefined)
+interface WorkspaceFilterProps {
+  onFilterChange?: (filter: {
+    category?: string
+    location?: string
+    date?: Date
+  }) => void
+  selectedCategory?: string
+  selectedLocation?: string
+  selectedDate?: Date
+}
+
+export function WorkspaceFilter({
+  onFilterChange,
+  selectedCategory = "All Workspaces",
+  selectedLocation = "All Locations",
+  selectedDate,
+}: WorkspaceFilterProps) {
+  const [category, setCategory] = useState<string>(selectedCategory)
+  const [location, setLocation] = useState<string>(selectedLocation)
+  const [date, setDate] = useState<Date | undefined>(selectedDate)
+
+  useEffect(() => {
+    setCategory(selectedCategory)
+    setLocation(selectedLocation)
+    setDate(selectedDate)
+  }, [selectedCategory, selectedLocation, selectedDate])
+
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory)
+    onFilterChange?.({ category: newCategory })
+  }
+
+  const handleLocationChange = (newLocation: string) => {
+    setLocation(newLocation)
+    onFilterChange?.({ location: newLocation })
+  }
+
+  const handleDateChange = (newDate: Date | undefined) => {
+    setDate(newDate)
+    onFilterChange?.({ date: newDate })
+  }
+
+  const handleSearch = () => {
+    onFilterChange?.({
+      category,
+      location,
+      date,
+    })
+  }
 
   return (
     <div className="flex flex-col sm:flex-row gap-2 w-full max-w-3xl mx-auto">
@@ -56,20 +101,20 @@ export function WorkspaceFilter() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full sm:w-auto justify-between">
-            <span className={cn("mr-2", selectedCategory === "All Workspaces" ? "text-muted-foreground" : "")}>
-              {selectedCategory === "All Workspaces" ? "Workspace" : selectedCategory}
+            <span className={cn("mr-2", category === "All Workspaces" ? "text-muted-foreground" : "")}>
+              {category === "All Workspaces" ? "Workspace" : category}
             </span>
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px]">
-          {workspaceCategories.map((category) => (
+          {workspaceCategories.map((cat) => (
             <DropdownMenuItem
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={cn(category === selectedCategory && "font-medium bg-accent")}
+              key={cat}
+              onClick={() => handleCategoryChange(cat)}
+              className={cn(cat === category && "font-medium bg-accent")}
             >
-              {category}
+              {cat}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -80,20 +125,20 @@ export function WorkspaceFilter() {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full sm:w-auto justify-between">
             <MapPin className="mr-2 h-4 w-4" />
-            <span className={cn(selectedLocation === "All Locations" ? "text-muted-foreground" : "")}>
-              {selectedLocation === "All Locations" ? "Where" : selectedLocation}
+            <span className={cn(location === "All Locations" ? "text-muted-foreground" : "")}>
+              {location === "All Locations" ? "Where" : location}
             </span>
             <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] max-h-[300px] overflow-y-auto">
-          {locations.map((location) => (
+          {locations.map((loc) => (
             <DropdownMenuItem
-              key={location}
-              onClick={() => setSelectedLocation(location)}
-              className={cn(location === selectedLocation && "font-medium bg-accent")}
+              key={loc}
+              onClick={() => handleLocationChange(loc)}
+              className={cn(loc === location && "font-medium bg-accent")}
             >
-              {location}
+              {loc}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -112,12 +157,14 @@ export function WorkspaceFilter() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+          <Calendar mode="single" selected={date} onSelect={handleDateChange} initialFocus />
         </PopoverContent>
       </Popover>
 
       {/* Search Button */}
-      <Button className="w-full sm:w-auto">Search</Button>
+      <Button className="w-full sm:w-auto" onClick={handleSearch}>
+        Search
+      </Button>
     </div>
   )
 }

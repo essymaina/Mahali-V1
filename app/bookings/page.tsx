@@ -4,19 +4,12 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Calendar, Clock, LogOut, MapPin, Settings, User, X } from "lucide-react"
-
-import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { useAuth } from "../../components/auth-context"
+import { Calendar, Clock, MapPin, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAuth } from "@/components/auth-context"
+import { Navbar } from "@/components/navbar"
 
 // Define booking type
 interface Booking {
@@ -30,10 +23,10 @@ interface Booking {
   image: string
 }
 
-// Mock bookings data
+// Mock data for bookings - in a real app, you would fetch this from an API
 const BOOKINGS: Booking[] = [
   {
-    id: "b1",
+    id: "booking-1",
     workspaceName: "Nairobi Garage",
     location: "Westlands",
     date: "2025-04-15",
@@ -43,42 +36,32 @@ const BOOKINGS: Booking[] = [
     image: "/placeholder.svg?height=300&width=400",
   },
   {
-    id: "b2",
-    workspaceName: "iHub Meeting Room",
+    id: "booking-2",
+    workspaceName: "iHub",
     location: "Kilimani",
     date: "2025-04-20",
-    startTime: "14:00",
+    startTime: "10:00",
     endTime: "16:00",
     status: "upcoming",
     image: "/placeholder.svg?height=300&width=400",
   },
   {
-    id: "b3",
-    workspaceName: "The Alchemist",
-    location: "Westlands",
-    date: "2025-03-10",
-    startTime: "10:00",
-    endTime: "15:00",
-    status: "completed",
-    image: "/placeholder.svg?height=300&width=400",
-  },
-  {
-    id: "b4",
+    id: "booking-3",
     workspaceName: "Workstyle",
     location: "Karen",
-    date: "2025-03-05",
+    date: "2025-03-28",
     startTime: "09:00",
     endTime: "18:00",
     status: "completed",
     image: "/placeholder.svg?height=300&width=400",
   },
   {
-    id: "b5",
-    workspaceName: "Cowork Cafe",
+    id: "booking-4",
+    workspaceName: "The Mint Hub",
     location: "Lavington",
-    date: "2025-03-01",
-    startTime: "13:00",
-    endTime: "17:00",
+    date: "2025-03-15",
+    startTime: "08:00",
+    endTime: "14:00",
     status: "cancelled",
     image: "/placeholder.svg?height=300&width=400",
   },
@@ -86,7 +69,7 @@ const BOOKINGS: Booking[] = [
 
 export default function BookingsPage() {
   const router = useRouter()
-  const { user, isLoading, isPremium, logout } = useAuth()
+  const { user, isLoading, logout } = useAuth()
   const [activeTab, setActiveTab] = useState<string>("upcoming")
 
   useEffect(() => {
@@ -95,11 +78,6 @@ export default function BookingsPage() {
       router.push("/login")
     }
   }, [user, isLoading, router])
-
-  const handleLogout = () => {
-    logout()
-    router.push("/")
-  }
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }
@@ -123,90 +101,10 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <h1 className="text-2xl font-bold text-white bg-[#0a1f56] px-4 py-2">MAHALI</h1>
-          </Link>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/events" className="font-medium">
-              EVENTS
-            </Link>
-            <Link href="/bookings" className="font-medium text-[#0a1f56]">
-              BOOKINGS
-            </Link>
-            <Link href="/" className="font-medium">
-              HOME
-            </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium">
-                      {user.firstName} {user.lastName}
-                      {isPremium && (
-                        <Badge variant="outline" className="ml-2 bg-[#0a1f56]/10 text-[#0a1f56] border-[#0a1f56]/20">
-                          Premium
-                        </Badge>
-                      )}
-                    </p>
-                    <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={`/profile/${user.id}`}>My Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </nav>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href="/events">EVENTS</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/bookings">BOOKINGS</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/">HOME</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
 
@@ -221,7 +119,10 @@ export default function BookingsPage() {
               {getFilteredBookings("upcoming").length > 0 ? (
                 <div className="space-y-4">
                   {getFilteredBookings("upcoming").map((booking) => (
-                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                    <div
+                      key={booking.id}
+                      className="border rounded-lg overflow-hidden flex flex-col md:flex-row bg-white"
+                    >
                       <div className="relative w-full md:w-48 h-32">
                         <Image
                           src={booking.image || "/placeholder.svg"}
@@ -248,10 +149,19 @@ export default function BookingsPage() {
                           {booking.startTime} - {booking.endTime}
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push(`/bookings/reschedule/${booking.id}`)}
+                          >
                             Reschedule
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-500 border-red-200 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-500 border-red-200 hover:bg-red-50"
+                            onClick={() => router.push(`/bookings/cancel/${booking.id}`)}
+                          >
                             <X className="h-4 w-4 mr-1" />
                             Cancel
                           </Button>
@@ -276,7 +186,10 @@ export default function BookingsPage() {
               {getFilteredBookings("completed").length > 0 ? (
                 <div className="space-y-4">
                   {getFilteredBookings("completed").map((booking) => (
-                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                    <div
+                      key={booking.id}
+                      className="border rounded-lg overflow-hidden flex flex-col md:flex-row bg-white"
+                    >
                       <div className="relative w-full md:w-48 h-32">
                         <Image
                           src={booking.image || "/placeholder.svg"}
@@ -302,7 +215,11 @@ export default function BookingsPage() {
                           <Clock className="h-4 w-4 mr-1" />
                           {booking.startTime} - {booking.endTime}
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/bookings/review/${booking.id}`)}
+                        >
                           Leave a Review
                         </Button>
                       </div>
@@ -322,7 +239,10 @@ export default function BookingsPage() {
               {getFilteredBookings("cancelled").length > 0 ? (
                 <div className="space-y-4">
                   {getFilteredBookings("cancelled").map((booking) => (
-                    <div key={booking.id} className="border rounded-lg overflow-hidden flex flex-col md:flex-row">
+                    <div
+                      key={booking.id}
+                      className="border rounded-lg overflow-hidden flex flex-col md:flex-row bg-white"
+                    >
                       <div className="relative w-full md:w-48 h-32">
                         <Image
                           src={booking.image || "/placeholder.svg"}
@@ -348,7 +268,11 @@ export default function BookingsPage() {
                           <Clock className="h-4 w-4 mr-1" />
                           {booking.startTime} - {booking.endTime}
                         </div>
-                        <Button className="bg-[#0a1f56] hover:bg-[#0a1f56]/90" size="sm">
+                        <Button
+                          className="bg-[#0a1f56] hover:bg-[#0a1f56]/90"
+                          size="sm"
+                          onClick={() => router.push(`/workspace/${booking.id.replace("booking-", "")}`)}
+                        >
                           Book Again
                         </Button>
                       </div>

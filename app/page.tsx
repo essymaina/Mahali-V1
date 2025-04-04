@@ -1,132 +1,49 @@
-"use client";
+import { WorkspaceFilter } from "../components/workspace-filter"
+import { Button } from "../components/ui/button"
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Search, User, LogOut } from "lucide-react";
-
-import { Button } from "../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "../components/ui/select";
-import { cn } from "src/lib/utils";
-import { ThemeToggle } from "../components/theme-toggle";
-
-// Define the expected shape of the user object
-interface User {
-  type: "workspace" | "user";
-  businessName?: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
-}
-
-export default function HomePage() {
-  const router = useRouter();
-  const [category, setCategory] = useState("");
-  const [location, setLocation] = useState("");
-  const [date, setDate] = useState("");
-  const [error, setError] = useState("");
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Check if user is logged in
-    const authData = localStorage.getItem("mahali-user-auth");
-    if (authData) {
-      try {
-        const userData: User = JSON.parse(authData);
-        setUser(userData);
-      } catch (err) {
-        console.error("Failed to parse user data", err);
-        localStorage.removeItem("mahali-user-auth");
-      }
-    }
-  }, []);
-
-  const handleSearch = () => {
-    if (!category || !date) {
-      setError("Please select a workspace category and date to continue");
-      return;
-    }
-    setError("");
-    const searchParams = new URLSearchParams({ category, location, date });
-    router.push(`/search?${searchParams.toString()}`);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("mahali-user-auth");
-    setUser(null);
-  };
-
-  const handleLoginRedirect = () => {
-    if (user?.type === "workspace") {
-      router.push("/workspace/dashboard");
-    } else {
-      router.push("/auth/user/login");
-    }
-  };
-
+export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col dark:bg-gray-950 dark:text-gray-100">
-      <header className="border-b dark:border-gray-800">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white bg-[#0a1f56] dark:bg-[#1a2f66] px-4 py-2">MAHALI</h1>
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="/events" className="font-medium dark:text-gray-200">EVENTS</a>
-            <a href="/bookings" className="font-medium dark:text-gray-200">BOOKINGS</a>
-            <a href="/" className="font-medium dark:text-gray-200">HOME</a>
-            <ThemeToggle />
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <div className="p-2">
-                    <p className="font-medium">{user.type === "workspace" ? user.businessName : `${user.firstName} ${user.lastName}`}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push(user.type === "workspace" ? "/workspace/dashboard" : "/bookings")}>
-                    {user.type === "workspace" ? "Dashboard" : "My Bookings"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button variant="ghost" size="icon" className="rounded-full" onClick={handleLoginRedirect}>
-                <User className="h-5 w-5" />
-              </Button>
-            )}
-          </nav>
+    <main className="flex min-h-screen flex-col">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-muted/50 to-muted">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Find Your Perfect Workspace in Nairobi
+              </h1>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+                Book a table, co-working space, meeting rooms, and more.
+              </p>
+            </div>
+            <div className="w-full max-w-3xl">
+              <WorkspaceFilter />
+            </div>
+            <div className="mt-8"></div>
+          </div>
         </div>
-      </header>
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <Button className="w-full h-12 bg-[#0a1f56] text-white" onClick={handleSearch}>
-          <Search className="h-5 w-5" /> Search
-        </Button>
-        {error && <div className="text-red-500 text-center mt-2">{error}</div>}
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Bonne%20rentr%C3%A9e%20%C3%A0%20toutes%20et%20tous%20%21-O8ymC6gxGuLl6GLHvh9Y7JVQFk4Rcl.jpeg"
-          alt="Workspace"
-          width={1200}
-          height={600}
-          className="w-full h-auto rounded-lg"
-          priority
-        />
-      </main>
-    </div>
-  );
+      </section>
+
+      <section className="w-full py-12 md:py-24 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl mb-8">Featured Workspaces</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {/* Workspace cards */}
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="h-48 bg-muted rounded-t-lg"></div>
+                <div className="p-4">
+                  <h3 className="font-semibold">Workspace Name {i}</h3>
+                  <p className="text-sm text-muted-foreground">Location • Category</p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <p className="font-medium">KSh 2,500/day</p>
+                    <Button size="sm">Book Now</Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }
-
-

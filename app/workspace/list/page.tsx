@@ -1,9 +1,9 @@
 "use client"
 
+import type React from 'react'
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Building, ExternalLink, LogOut, Settings, User, Wifi } from "lucide-react"
+import { ExternalLink, Wifi } from "lucide-react"
 import confetti from "canvas-confetti"
 
 import { Button } from "../../../components/ui/button"
@@ -11,26 +11,39 @@ import { Input } from "../../../components/ui/input"
 import { Label } from "../../../components/ui/label"
 import { Textarea } from "../../../components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu"
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../../components/ui/dialog"
-import PhotosUpload from "./photos-upload"
+import Navbar from "../../../components/navbar"
+import { useAuth } from "../../../components/auth-context"
+import { PhotosUpload } from "../../../components/workspace/photos-upload"
+
+// Define the Photo type
+interface Photo {
+  id: string
+  url: string
+  name: string
+  type: string
+  file: File
+}
+
+// Define the User type with user_type
+interface WorkspaceUser {
+  id: string
+  email: string
+  user_type: string
+  firstName?: string
+  lastName?: string
+}
 
 export default function ListWorkspacePage() {
   const router = useRouter()
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, isLoading } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [wifiTested, setWifiTested] = useState(false)
-  const [wifiSpeed, setWifiSpeed] = useState(null)
-  const [photos, setPhotos] = useState([])
+  const [wifiSpeed, setWifiSpeed] = useState<number | null>(null)
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [isTestRunning, setIsTestRunning] = useState(false)
 
   // Form state
   const [name, setName] = useState("")
@@ -46,52 +59,82 @@ export default function ListWorkspacePage() {
   const [email, setEmail] = useState("")
 
   useEffect(() => {
-    // Check if user is logged in and is a workspace owner
-    const authData = localStorage.getItem("mahali-user-auth")
-
-    if (!authData) {
-      router.push("/auth/workspace/login")
-      return
+    // Set email from user context if available
+    if (user) {
+      setEmail(user.email || "")
     }
-
-    const userData = JSON.parse(authData)
-
-    if (userData.type !== "workspace") {
-      router.push("/auth/workspace/login")
-      return
-    }
-
-    setUser(userData)
-    setEmail(userData.email || "")
-    setIsLoading(false)
-  }, [router])
-
-  const handleLogout = () => {
-    localStorage.removeItem("mahali-user-auth")
-    router.push("/")
-  }
+  }, [user])
 
   const handleWifiTest = () => {
-    // In a real application, this would redirect to Measurement Lab
-    // For this demo, we'll simulate a WiFi test result
-    window.open("https://speed.measurementlab.net", "_blank")
+    
+    const testWindow = window.open(
+      `/wifi-speed-test?returnTo=${encodeURIComponent("/workspace/list")}`,
+      "_blank",
+      "width=600,height=700",
+    )
+    const handleMessage = (event: MessageEvent) => {
+      // Check if the message is from our speed test
+      if (event.data && event.data.type === "SPEED_TEST_RESULT") {
+        const { downloadSpeed } = event.data
 
-    // Simulate getting results back
-    setTimeout(() => {
-      const randomSpeed = Math.floor(Math.random() * 50) + 20 // Random speed between 20-70 Mbps
-      setWifiSpeed(randomSpeed)
-      setWifiTested(true)
-    }, 1000)
+        // Update the state with the test results
+        setWifiSpeed(downloadSpeed)
+        setWifiTested(true)
+
+        // Remove the event listener
+        window.removeEventListener("message", handleMessage)
+    
+    }
   }
 
-  const handleSubmit = async (e) => {
+  window.addEventListener("message", handleMessage)
+
+  // Return a cleanup function
+  return () => {
+    window.removeEventListener("message", handleMessage)
+  }
+}
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      // In a real application, you would submit to a backend
-      // This is a mock implementation
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Prepare data for submission
+      const workspaceData = {
+        owner_id: user?.id,
+        name,
+        category,
+        has_generator: hasGenerator === "yes",
+        seats: Number.parseInt(seats),
+        description,
+        amenities,
+        price: Number.parseInt(price),
+        location,
+        opening_time: openingTime,
+        closing_time: closingTime,
+        contact_email: email,
+        wifi_speed: wifiSpeed,
+        photos: photos.map((photo: Photo) => ({
+          url: photo.url,
+          type: photo.type,
+        })),
+      }
+
+      // Submit to API
+      const response = await fetch("/api/workspaces", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(workspaceData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit workspace")
+      }
 
       // Show confirmation dialog with confetti
       setShowConfirmation(true)
@@ -117,56 +160,27 @@ export default function ListWorkspacePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+        <div className="h-8 w-8 rounded-full border-4 border-t-primary animate-spin"></div>
       </div>
     )
   }
 
+   // Type guard to check if user has user_type property
+   const isWorkspaceUser = (user: any): user is WorkspaceUser => {
+    return user && typeof user.user_type === "string"
+  }
+
+  if (!user || !isWorkspaceUser(user) || user.user_type !== "workspace") {
+    router.push("/login")
+    return null
+  }
+
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <h1 className="text-2xl font-bold text-white bg-[#0a1f56] px-4 py-2">MAHALI</h1>
-          </Link>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">{user.businessName || "Business Name"}</p>
-                  <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/workspace/dashboard">
-                  <Building className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/workspace/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" onClick={() => router.push("/workspace/dashboard")} className="p-0 h-auto">
             <span className="sr-only">Back</span>
@@ -466,4 +480,3 @@ export default function ListWorkspacePage() {
     </div>
   )
 }
-

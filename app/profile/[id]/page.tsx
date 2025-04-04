@@ -17,16 +17,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu"
-import { getUserSession } from "utils/auth"
+import { useAuth } from "../../../components/auth-context"
 
 // Define types
-interface UserType {
-  firstName: string
-  lastName: string
-  email: string
-  type: string
-}
-
 interface Workspace {
   id: string
   name: string
@@ -136,36 +129,19 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ params }: ProfilePageProps) {
   const router = useRouter()
-  const [user, setUser] = useState<UserType | null>(null)
+  const { user, isLoading, isPremium, logout } = useAuth()
   const [profile, setProfile] = useState<ProfileType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isPremium, setIsPremium] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is logged in
-    const authData = localStorage.getItem("mahali-user-auth")
-
-    if (!authData) {
-      router.push("/auth/user/login")
+    if (!isLoading && !user) {
+      router.push("/login")
       return
     }
-
-    const userData = JSON.parse(authData) as UserType
-
-    if (userData.type !== "user") {
-      router.push("/auth/user/login")
-      return
-    }
-
-    setUser(userData)
 
     // Check if user is premium
-    const premiumStatus = localStorage.getItem("mahali-premium-status")
-    const isPremiumUser = premiumStatus === "active"
-    setIsPremium(isPremiumUser)
-
-    // If not premium, redirect to premium page
-    if (!isPremiumUser) {
+    if (!isLoading && !isPremium) {
       router.push("/premium")
       return
     }
@@ -179,11 +155,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
 
     setProfile(foundProfile)
-    setIsLoading(false)
-  }, [router, params.id])
+    setProfileLoading(false)
+  }, [router, params.id, user, isLoading, isPremium])
 
   const handleLogout = () => {
-    localStorage.removeItem("mahali-user-auth")
+    logout()
     router.push("/")
   }
 
@@ -192,7 +168,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     return new Date(dateString).toLocaleDateString("en-US", options)
   }
 
-  if (isLoading || !user || !profile) {
+  if (isLoading || profileLoading || !user || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>

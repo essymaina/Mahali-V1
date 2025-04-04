@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
 
     // Generate QR Code with booking details
-    const qrCodeDataURL = await QRCode.toDataURL(`https://mahali.com/checkin/${bookingId}`);
+    const qrCodeDataURL = await QRCode.toDataURL(`https://www.mahalispaces.com/checkin/${bookingId}`);
 
     // Mock: Log the QR code for now (later, attach it to an email)
     console.log(`Generated QR Code for booking ${bookingId}:`, qrCodeDataURL);
