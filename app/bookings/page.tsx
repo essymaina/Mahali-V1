@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Calendar, Clock, MapPin, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAuth } from "@/components/auth-context"
-import { Navbar } from "@/components/navbar"
+import { Button } from "../../components/ui/button"
+import { Badge } from "../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { useAuth } from "../../components/auth-context"
+import Navbar from "../../components/navbar"
 
 // Define booking type
 interface Booking {

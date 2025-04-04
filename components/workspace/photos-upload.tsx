@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import Image from "next/image"
 import { X, Upload, Plus, Camera } from "lucide-react"
@@ -62,11 +64,11 @@ export function PhotosUpload({ photos, setPhotos }: PhotosUploadProps) {
     }
   }
 
-  const handleChange = (e: React.DragEvent<HTMLDivElement>) => {
+  // Fixed: Changed from DragEvent to ChangeEvent for Input compatibility
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
-    const target = e.target as HTMLInputElement
-    if (target.files && target.files[0] && photos.length < MAX_PHOTOS && currentPhotoType) {
-      handleFiles(target.files)
+    if (e.target.files && e.target.files[0] && photos.length < MAX_PHOTOS && currentPhotoType) {
+      handleFiles(e.target.files)
     }
   }
 
@@ -156,10 +158,10 @@ export function PhotosUpload({ photos, setPhotos }: PhotosUploadProps) {
               variant="outline"
               onClick={() => {
                 const fileUpload = document.getElementById("file-upload")
-              if (fileUpload) {
-                fileUpload.click()
-              }
-            }}
+                if (fileUpload) {
+                  fileUpload.click()
+                }
+              }}
               disabled={photos.length >= MAX_PHOTOS || !currentPhotoType}
               className="flex items-center gap-2"
             >

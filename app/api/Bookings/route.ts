@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseClient"
-import { getUserSession } from "@/utils/auth"
+import { getUserSession } from "../../../utils/auth"
 import { cookies } from "next/headers"
 import { v4 as uuidv4 } from "uuid"
 
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     if (error) throw error
 
     // Generate QR Code URL
-    const qrCodeUrl = `https://mahalispaces.com/check-in/${bookingId}`
+    const qrCodeUrl = `https://www.mahalispaces.com/check-in/${bookingId}`
 
     // TODO: Send confirmation email with QR Code
 
